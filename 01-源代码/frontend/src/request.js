@@ -1,0 +1,104 @@
+/**
+ * 统一 HTTP 请求封装（基于 axios）
+ *
+ * 【同源方案】前端不再硬编码后端地址，默认使用相对路径（同源）：
+ *   - 开发期：vite.config.js 的 server.proxy 把 /user、/api、/product 等前缀
+ *     转发到 http://127.0.0.1:5000，浏览器看到的是同源请求，因此不触发 CORS；
+ *   - 交付/生产：前端 dist 与后端由同一入口（如 Nginx）对外服务，页面与接口同源。
+ * 只有在"前端不经过代理、要直连某个后端地址"时才用环境变量覆盖：
+ *   前端根目录/.env.local → VITE_API_BASE_URL=http://<host>:<port>
+ */
+import axios from "axios";
+import {message} from "ant-design-vue";
+// 安全隧道：请求体加密 / 响应解密（实现见 src/utils/sm-tunnel.js）
+import { sealRequest, openResponse, isTunnelUrl } from './utils/sm-tunnel';
+
+// 后端接口基础地址：默认留空 = 相对路径 = 同源（由 Vite 代理 / Nginx 转发到后端）
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+
+/**
+ * 把后端返回的路径（如 '/static/uploads/xx.png'）拼成可访问的 URL。
+ * 组件里展示商品/订单图片时使用：<img :src="getApiUrl(record.image_url)" />
+ * - API_BASE_URL 为空（默认同源）时返回根相对路径，由 Vite 代理 / Nginx 转发到后端；
+ * - 传入的若已是 http(s) 完整地址则原样返回，避免二次拼接。
+ */
+export const getApiUrl = (path = '') => {
+  if (!path) {
+    return '';
+  }
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+  return `${API_BASE_URL.replace(/\/$/, '')}${path.startsWith('/') ? path : `/${path}`}`;
+};
+
+// 创建 axios 实例：业务模块（src/api/*.js）只需写 '/user/xxx' 等相对路径，默认由同源代理转发
+const myAxios = axios.create({
+  baseURL: API_BASE_URL,                    // 接口前缀（留空 = 同源相对路径）
+  timeout: 100000,                          // 请求超时（毫秒）：大文件上传/证书登录耗时较长
+  headers: {'X-Custom-Header': 'foobar'}    // 预留的自定义请求头
+});
+
+// ---------- 请求拦截器：自动携带登录令牌 + 对隧道接口加密请求体 ----------
+myAxios.interceptors.request.use(function (config) {
+    // 从 localStorage 读取 JWT（登录成功时由下面的响应拦截器写入）
+    const token = localStorage.getItem('token');
+    if (token) {
+      // 后端通过 Authorization: Bearer <token> 识别当前用户（见后端 jwt_auth 中间件）
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    // 挂了 @tunnel_required 的接口：把请求体封成隧道包 {"env":..., "data":...}
+    // 同时把响应解密所需的 {s2cKey,s2cIv,nonce} 挂到本次 config 上（不能放全局）
+    if (isTunnelUrl(config.url)) {
+      const sealed = sealRequest(config.data || {});
+      config.data = sealed.body;
+      config.__tunnelMeta = sealed.meta;
+      config.headers['Content-Type'] = 'application/json';
+    }
+    return config;
+  }, function (error) {
+    // 请求构造阶段出错（如配置非法），直接抛给调用方处理
+    return Promise.reject(error);
+  });
+
+// ---------- 响应拦截器：解密隧道响应 + 保存 token + 401 跳转 ----------
+myAxios.interceptors.response.use(function (response) {
+    // HTTP 2xx 都会进入这里
+    // ① 如果响应体是隧道包（带 data+req）就用本次请求的 s2c 密钥解密；
+    //    隧道错误/普通接口的明文响应原样返回
+    response.data = openResponse(response.data, response.config.__tunnelMeta);
+    // ② 登录接口成功（code === 0）时把 access_token 保存到 localStorage
+    if (response.config.url === '/user/login' && response.data.code === 0) {
+      if (response.data.data && response.data.data.access_token) {
+        localStorage.setItem('token', response.data.data.access_token);
+      }
+    }
+    return response;
+  }, function (error) {
+    // 非 2xx 响应或网络错误进入这里
+    const body = error.response && error.response.data;
+    const code = body && body.code;
+
+    // 隧道自身的错误（重放 409 / 时间戳过期 401 / 报文不合法 400 …）：
+    // 这时后端返回的是一段明文说明，直接提示用户，别当成"登录过期"把人踢去登录页
+    if (typeof code === 'string' && code.startsWith('TUNNEL_')) {
+      message.error(`安全隧道校验失败：${body.message || code}`);
+      return Promise.reject(error);
+    }
+
+    if (error.response && error.response.status === 401) {
+      // 401 未授权：token 缺失/过期，清除本地 token 并跳回对应登录页
+      // 后台账号（staff/admin/auditor 路径）跳后台登录页，前台用户跳用户登录页
+      const pathname = window.location.pathname;
+      const isStaffPage = pathname.startsWith('/staff') || pathname.startsWith('/admin') || pathname.startsWith('/auditor');
+      const loginPath = isStaffPage ? '/staff/login' : '/user/login';
+      localStorage.removeItem('token');
+      if (pathname !== loginPath) {
+        window.location.replace(loginPath);
+      }
+    }
+    return Promise.reject(error);
+  });
+
+// 默认导出实例；所有 api 模块（src/api/*.js）统一从这里引入
+export default myAxios;
