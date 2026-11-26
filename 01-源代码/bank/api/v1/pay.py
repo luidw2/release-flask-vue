@@ -7,7 +7,6 @@ import time
 
 user = Blueprint('pay', __name__)
 
-MERCHANT_PUBLIC_KEY_PATH = "E:/Python/综设1重构-flask+vue-sm2尝试/综设1重构-flask+vue/后端flask/app/certs/sm2_key/merchant_public.pem"
 SIGN_TEMPLATE = "{order_id}|{amount}|{merchant_id}|{timestamp}"
 
 TIMESTAMP_VALIDITY = 60
@@ -53,7 +52,7 @@ def pay():
                                        error_title='配置错误',
                                        error_message='商户公钥未配置')
             # 获取公钥
-        public_key = merchant.public_key
+        public_key = (merchant.public_key or "").replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\r", "\r")
 
 
 

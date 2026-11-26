@@ -1,8 +1,8 @@
-USE test;
+USE test_release;
 SET FOREIGN_KEY_CHECKS=0;
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: localhost    Database: test
+-- Host: localhost    Database: test_release
 -- ------------------------------------------------------
 -- Server version	8.0.44
 
@@ -23,7 +23,7 @@ SET FOREIGN_KEY_CHECKS=0;
 
 LOCK TABLES `cart` WRITE;
 /*!40000 ALTER TABLE `cart` DISABLE KEYS */;
-INSERT INTO `cart` (`id`, `user_id`, `created_at`, `updated_at`) VALUES (4,4,'2026-06-03 10:34:38','2026-06-03 10:34:38'),(5,5,'2026-06-03 10:34:50','2026-06-03 10:34:50'),(6,6,'2026-06-04 16:56:21','2026-06-04 16:56:21'),(7,7,'2026-07-01 12:45:24','2026-07-01 12:45:24'),(8,8,'2026-07-25 12:19:26','2026-07-25 12:19:26'),(10,14,'2026-10-08 15:23:37','2026-10-08 15:23:37'),(11,15,'2026-11-23 11:40:02','2026-11-23 11:40:02');
+
 /*!40000 ALTER TABLE `cart` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -42,7 +42,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `order` WRITE;
 /*!40000 ALTER TABLE `order` DISABLE KEYS */;
-INSERT INTO `order` (`id`, `user_id`, `created_at`, `status`, `total_price`) VALUES (25,5,'2026-06-03 11:00:39','paid',100),(26,5,'2026-06-03 11:02:19','paid',100),(27,4,'2026-06-03 11:11:10','paid',100),(28,4,'2026-06-03 11:15:33','paid',100),(29,4,'2026-06-03 11:16:05','paid',100),(30,5,'2026-06-04 15:35:04','pending',100),(31,6,'2026-06-04 16:57:25','paid',100),(32,6,'2026-06-04 17:00:16','paid',20000),(33,6,'2026-06-04 17:00:49','pending',80200),(34,6,'2026-06-04 17:04:34','paid',20000),(35,4,'2026-07-01 12:02:00','paid',200),(36,4,'2026-07-01 12:02:31','paid',20000),(37,4,'2026-07-01 12:05:15','paid',200),(38,4,'2026-07-01 12:30:34','paid',200),(39,7,'2026-07-01 12:46:00','paid',20044),(40,7,'2026-07-01 15:51:02','paid',10022),(41,7,'2026-07-01 15:53:16','pending',10022),(42,7,'2026-07-01 16:00:52','paid',10022),(43,7,'2026-07-01 16:03:22','paid',10022),(44,5,'2026-09-03 08:43:56','paid',10022),(45,14,'2026-10-08 15:27:45','pending',10022);
+
 /*!40000 ALTER TABLE `order` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -52,7 +52,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `order_item` WRITE;
 /*!40000 ALTER TABLE `order_item` DISABLE KEYS */;
-INSERT INTO `order_item` (`id`, `order_id`, `product_id`, `product_name`, `price`, `quantity`, `subtotal`, `image_url`, `created_at`) VALUES (31,25,4,'Updated Product',100,1,100,NULL,'2026-06-03 11:00:39'),(32,26,4,'Updated Product',100,1,100,NULL,'2026-06-03 11:02:19'),(33,27,4,'Updated Product',100,1,100,NULL,'2026-06-03 11:11:10'),(34,28,4,'Updated Product',100,1,100,NULL,'2026-06-03 11:15:33'),(35,29,4,'Updated Product',100,1,100,NULL,'2026-06-03 11:16:05'),(36,30,4,'Updated Product',100,1,100,NULL,'2026-06-04 15:35:04'),(37,31,4,'Updated Product',100,1,100,NULL,'2026-06-04 16:57:25'),(39,33,6,'zxc',200,1,200,NULL,'2026-06-04 17:00:49'),(42,35,6,'zxc',200,1,200,NULL,'2026-07-01 12:02:00'),(44,37,6,'zxc',200,1,200,NULL,'2026-07-01 12:05:15'),(45,38,6,'zxc',200,1,200,NULL,'2026-07-01 12:30:34'),(46,39,7,'test_product_seller',10022,2,20044,'/static/uploads/20260701124229_png','2026-07-01 12:46:00'),(47,40,7,'test_product_seller',10022,1,10022,'/static/uploads/20260701124229_png','2026-07-01 15:51:02'),(48,41,7,'test_product_seller',10022,1,10022,'/static/uploads/20260701124229_png','2026-07-01 15:53:16'),(49,42,7,'test_product_seller',10022,1,10022,'/static/uploads/20260701124229_png','2026-07-01 16:00:52'),(50,43,7,'test_product_seller',10022,1,10022,'/static/uploads/20260701124229_png','2026-07-01 16:03:22'),(51,44,7,'test_product_seller',10022,1,10022,'/static/uploads/20260701124229_png','2026-09-03 08:43:56'),(52,45,7,'test_product_seller',10022,1,10022,'/static/uploads/20260701124229_png','2026-10-08 15:27:45');
+
 /*!40000 ALTER TABLE `order_item` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -62,7 +62,6 @@ UNLOCK TABLES;
 
 LOCK TABLES `product` WRITE;
 /*!40000 ALTER TABLE `product` DISABLE KEYS */;
-INSERT INTO `product` (`id`, `name`, `description`, `price`, `status`, `seller_id`, `image_url`, `created_at`, `updated_at`) VALUES (4,'Updated Product_1111','Updated Description',10000,'active',2,NULL,'2026-06-03 10:40:27','2026-07-01 15:46:13'),(6,'zxc','wiu',200,'active',2,NULL,'2026-06-04 16:58:46','2026-06-04 16:58:46'),(7,'test_product_seller','wu',10022,'active',4,'/static/uploads/20260701124229_png','2026-07-01 12:42:16','2026-07-01 12:42:29');
 /*!40000 ALTER TABLE `product` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -72,7 +71,6 @@ UNLOCK TABLES;
 
 LOCK TABLES `seller` WRITE;
 /*!40000 ALTER TABLE `seller` DISABLE KEYS */;
-INSERT INTO `seller` (`id`, `username`, `password`, `address`, `phone`, `is_active`, `role`, `permissions`, `failed_attempts`, `lock_until`, `created_at`, `updated_at`) VALUES (2,'seller_1','$2b$12$hJnKnS9a2x2fdrZ8ID8h9OO0Wi8Jg78saFMfBcC9mZgFBWf2xvW1.',NULL,NULL,1,'seller',NULL,0,NULL,'2026-06-03 10:35:02','2026-06-03 10:35:02'),(3,'seller_2','$2b$12$D6fW3sBE2qmOO8GAU44BWOfw4ZMRyEpmk618qkUtdU4wEykf01QsC',NULL,NULL,1,'seller',NULL,0,NULL,'2026-06-03 10:35:15','2026-06-03 10:35:15'),(4,'seller_test','$2b$12$kxA5deK99y11B95uz5BvOOA665HNzXfxnJwrb45S3M0hgmsd8EgVa',NULL,NULL,1,'seller',NULL,0,NULL,'2026-07-01 12:41:13','2026-07-01 12:41:13');
 /*!40000 ALTER TABLE `seller` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -92,7 +90,6 @@ UNLOCK TABLES;
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` (`id`, `username`, `password`, `is_active`, `role`, `permissions`, `failed_attempts`, `lock_until`, `created_at`, `updated_at`) VALUES (4,'user_1','$2b$12$DwddAy/p2gXWij9mrVleSuoLHNHNH3YrXV/6BCky6i1i3QR2LnU.u',1,'user',NULL,0,NULL,'2026-06-03 10:34:38','2026-10-29 11:03:03'),(5,'user_2','$2b$12$aixV2VYnoQa77nms/4qrduM1l9jGDifNzxJv0SLYHzck1VMo4I5xe',1,'user',NULL,0,NULL,'2026-06-03 10:34:50','2026-09-03 13:29:42'),(6,'user_3','$2b$12$RiukZfKikvtI/1X3bsKoNeXUfUAb2fEy3S15vSHZNIWmnJEZZHJna',1,'user',NULL,0,NULL,'2026-06-04 16:56:21','2026-06-04 16:56:21'),(7,'user_3_','$2b$12$Be.GKD0sU4mJbvKr4teFYuIWrZ0Up81VFfrH4/ZJPZr7Zuh.yKd.O',0,'user',NULL,0,NULL,'2026-07-01 12:45:24','2026-09-09 07:33:00'),(8,'assswd','$2b$12$T1ibjrWW455FAoInWkJ4Te5hKtmrwaeisSgXujLidVyB5XnsjzC3i',1,'user',NULL,0,NULL,'2026-07-25 12:19:26','2026-09-04 02:27:53'),(14,'kali_test1','$2b$12$XSOWjEgmEMQvRxere4T0AOtPuk8bWhULUaHadY.2vlsxbbAOwLymC',0,'user',NULL,0,NULL,'2026-10-08 15:23:37','2026-10-15 03:15:11'),(15,'user_1234','$2b$12$S7tot522JOVAOTrHWgQda.1ShKstUw2UXJV0XbNEBcV8cyV/ADMe6',1,'user',NULL,0,NULL,'2026-11-23 11:40:02','2026-11-23 11:40:02');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

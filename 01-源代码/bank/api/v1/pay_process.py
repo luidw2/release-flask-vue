@@ -72,7 +72,7 @@ def pay_process():
         tx_amount = tx.amount  # 在关闭session前保存金额
         # 5. 更新交易状态
 
-        public_key = merchant.public_key
+        public_key = (merchant.public_key or "").replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\r", "\r")
         if my_user.money - tx.amount <0:
             return render_template('pay_error.html',
                                    error_title='余额不足',

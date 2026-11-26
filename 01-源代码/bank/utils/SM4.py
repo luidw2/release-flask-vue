@@ -5,6 +5,9 @@ import shutil
 
 # OpenSSL 路径配置
 OPENSSL_PATH = os.getenv('OPENSSL_PATH') or shutil.which('openssl') or r'E:\OpenSSL-Win64\bin\openssl.exe'
+if not OPENSSL_PATH or not os.path.exists(OPENSSL_PATH):
+    raise RuntimeError(f'OpenSSL 不可用：{OPENSSL_PATH}；请安装 OpenSSL，并在 bank.env 中设置 OPENSSL_PATH')
+
 
 
 def run_openssl_command(args):

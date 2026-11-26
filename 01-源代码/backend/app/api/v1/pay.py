@@ -11,7 +11,7 @@
   前端点支付 → POST /api/pay/prepare（本文件）
     → 校验订单归属与状态(pending)
     → 用商户私钥 SM2 签名，生成带签名的 pay_url
-    → 前端 location 跳转到模拟银行  http://localhost:8080/pay?order_id=...&sign=...
+    → 前端 location 跳转到模拟银行  http://127.0.0.1:8080/pay?order_id=...&sign=...
     → 用户在「银行」页确认支付
     → ① 银行异步回调本项目 /api/pay/callback（callback.py：解密数字信封、订单置 paid）
     → ② 银行把用户浏览器重定向回 /pay/return（pay_return.py：渲染成功/失败结果页）
@@ -47,7 +47,7 @@ MERCHANT_PRIVATE_KEY_PATH = os.path.join(BASE_DIR, "certs", "sm2_key", "merchant
 # 银行模拟器同样运行在本机，因此这里直接写 localhost:8080 即可；
 # 若银行模拟器里曾配置旧的内网穿透(cpolar)回调域名，请一并改为
 # http://127.0.0.1:5000/api/pay/callback
-BANK_PAY_URL = "http://localhost:8080/pay"
+BANK_PAY_URL = "http://127.0.0.1:8080/pay"
 # 签名原文模板：固定用「订单号|金额|商户号|时间戳」拼出待签名字符串。
 # 银行验签时按相同规则重新拼接并校验 SM2 签名 —— 任一字段被篡改都会导致验签失败
 SIGN_TEMPLATE = "{order_id}|{amount}|{merchant_id}|{timestamp}"

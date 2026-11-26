@@ -22,7 +22,7 @@
     bank/                      ← 模拟银行（Flask，:8080）
     frontend/                  ← Vue3 前端（:5173）
   02-数据库/
-    schema.sql / seed.sql      ← 电商库 test
+    schema.sql / seed.sql      ← 电商库 test_release
     bank-schema.sql / bank-seed.sql  ← 银行库 fake_bank
   03-配置/
     demo.env                   ← 电商后端配置（复制成 backend/.env）
@@ -42,7 +42,23 @@
     SHA256SUMS.txt
 ```
 
-## 3. 初始化数据库
+## 3. 第一次配置（必做）
+
+> **下面的 `copy /Y`、`mysql <`、`start-*.bat` 请在 `cmd`（命令提示符）里执行，不要用 PowerShell。**  
+> PowerShell 不支持 `<` 重定向，且 `copy` 是 `Copy-Item` 的别名，不认 `/Y`。
+
+先改两个配置文件303-配置中的.env文件里的数据库账号/密码换成自己的：
+
+```text
+03-配置\demo.env   →  DB_USER、DB_PASSWORD
+03-配置\bank.env   →  DB_USER、DB_PASSWORD
+```
+
+如果本机 MySQL root 没有密码，就把 `DB_PASSWORD=` 留空。
+
+.env文件中的openssl地址之类的也要换
+
+## 4. 初始化数据库（cmd命令）
 
 电商库：
 
@@ -58,14 +74,9 @@ mysql -u root -p < 02-数据库/bank-schema.sql
 mysql -u root -p < 02-数据库/bank-seed.sql
 ```
 
-默认电商库 `test`，银行库 `fake_bank`。如果本机数据库名/账号不同，请修改 `demo.env` 和 `bank.env` 的 `DB_*`。
+默认电商库 `test_release`，银行库 `fake_bank`。如果本机数据库名不同，请同时修改 `demo.env`/`bank.env` 的 `DB_NAME` 和 SQL 里的 `USE`。
 
-## 4. 配置
-
-```bat
-copy /Y 03-配置\demo.env 01-源代码\backend\.env
-copy /Y 03-配置\bank.env 01-源代码\bank\.env
-```
+## 5. 配置
 
 - 如果 `openssl` 不在 PATH，编辑两个 `.env`，设置：
   ```ini
@@ -73,7 +84,7 @@ copy /Y 03-配置\bank.env 01-源代码\bank\.env
   ```
 - 前端地址默认 `http://127.0.0.1:5173`；生产改成 `https://你的域名`。
 
-## 5. 启动顺序
+## 6. 启动顺序
 
 ```bat
 04-启动\start-all.bat
@@ -105,7 +116,7 @@ npm run dev
 - 后端：`http://127.0.0.1:5000`
 - 前端：`http://127.0.0.1:5173`
 
-## 6. 演示账号
+## 7. 演示账号
 
 - 管理员：`admin1 / Admin@123456`（首次登录需绑定 TOTP）
 - 审计员：`audit1 / Audit@123456`（首次登录需绑定 TOTP）
@@ -113,7 +124,7 @@ npm run dev
 
 银行侧商户与演示余额已由 `bank-seed.sql` 初始化。
 
-## 7. 支付流程依赖
+## 8. 支付流程依赖
 
 支付是电商后端和模拟银行两个服务的联动：
 
@@ -127,21 +138,38 @@ npm run dev
 
 所以必须 **银行 :8080、电商后端 :5000、前端 :5173 同时启动**，缺一个支付流程就不完整。
 
-## 8. 常见问题
+## 9. 常见问题
 
 | 现象 | 处理 |
 |---|---|
 | `Access denied` / 数据库连不上 | 检查 `.env` 的 `DB_*`，确认 MySQL 已启动 |
-| `Unknown database 'test'/'fake_bank'` | 先执行对应的 schema.sql |
+| `Unknown database 'test_release'/'fake_bank'` | 先执行对应的 schema.sql |
 | 支付跳转 8080 失败 | 确认 `start-bank.bat` 已启动、端口 8080 未被占用 |
 | 支付回调失败 | 检查 `bank` 库 merchant 表的 `callback_url`/`return_url` 是否为 `http://localhost:5000/...` |
 | 登录 401 | 确认后端 5000 已启动、前端 5173 代理正常 |
 | `OpenSSL` 找不到 | 两个 `.env` 都设置 `OPENSSL_PATH` |
 | 商品图片不显示 | 确认 `app/static/uploads` 完整 |
 
-## 9. 限制与说明
+## 10. 限制与说明
 
 - 本包是课程演示版本，不是生产部署包；
 - 银行与电商都使用 Flask 开发服务器，生产应使用 Nginx + WSGI/HTTPS；
 - `demo.env`、`bank.env`、`app/certs` 内是演示密钥/证书，答辩后请轮换；
 - 支付回调/回跳地址目前是 `localhost:5000`，换机器/端口时需同步修改银行库 merchant 表。
+
+
+## 11. PowerShell 替代命令
+
+如果你习惯用 PowerShell：
+
+```powershell
+
+# 导库（用 cmd 执行重定向）
+cmd /c "mysql -u root -p < 02-数据库\schema.sql"
+cmd /c "mysql -u root -p < 02-数据库\seed.sql"
+cmd /c "mysql -u root -p < 02-数据库\bank-schema.sql"
+cmd /c "mysql -u root -p < 02-数据库\bank-seed.sql"
+
+# 启动脚本可以直接双击，或在 PowerShell 里：
+cmd /c "04-启动\start-all.bat"
+```
